@@ -4,7 +4,7 @@
 // Assignment 4 submission.
 //
 // Description:
-// Insert the number of division and play.
+// Insert the number of division in the console.
 //
 //***********************************************************************************************
 
@@ -41,22 +41,11 @@ glm::mat4 Projection;
 GLfloat u = 0.0f, v = 0.05f, w = 0.0f;
 //GLfloat u,v=0.1f,w;
 
-
 glm::vec3 currentCamPos;
 glm::vec3 currentCamVel;
 glm::vec3 lightColor;
 glm::vec3 lightPos = glm::vec3(u, v, w);
 glm::vec3 viewPos;
-
-const int division = 7;
-const int row = division;
-const int col = division;
-float planeUnit = 1.0f;
-float bound = planeUnit / 2.0f;
-float dividedUnit = planeUnit/division;
-
-const int NumVertices = division * division * 6;
-glm::vec3 normals[NumVertices];
 
 int frame=0,currentTime,timebase=0;
 float deltaTime = 0;
@@ -65,7 +54,20 @@ float speed = 4.0;
 float moveDist = 0;
 float maxDis = 20;
 
+
+int division;// = 7;
+
+int row;// = division;
+int col;// = division;
+float planeUnit = 1.0f;
+float bound = planeUnit / 2.0f;
+float dividedUnit;// = planeUnit/division;
+
+int NumVertices;// = row * col * 6;
+
+
 void init(void){
+
     //Specifying the name of vertex and fragment shaders.
     ShaderInfo shaders[] = {
         { GL_VERTEX_SHADER, "triangles.vert" },
@@ -120,27 +122,35 @@ void initPlane(){
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glUniform1i(glGetUniformLocation(program, "texture0"), 0);
     
-
+    glm::vec3 normals[NumVertices];
+    
     float*  planePoints;
     planePoints = new float[(row+1)*(col+1)*3];
     float mX, mY= 0.0f, mZ;
+
     int countV = 0;
+    
     for(int i=0; i<=row; ++i){
-        mZ = bound - (dividedUnit*i);
-        for(int j=0; j<= col; ++j)
-        {
+        for(int j=0; j<= col; ++j){
+            
+            mZ = bound - (dividedUnit*i);
             mX = -bound + (dividedUnit*j);
 
             planePoints[countV] = mX;
             planePoints[countV+1] = mY;
             planePoints[countV+2] = mZ;
-            normals[countV] = {0.0f,1.0f,0.0f};
+            
+            
+            normals[countV] = {0.0f,1.0f,0.0f,};
             normals[countV+1] = {0.0f,1.0f,0.0f};
             normals[countV+2] = {0.0f,1.0f,0.0f};
             countV +=3;
+
         }
     }
-
+        std::cout<<"0: " <<planePoints[0] <<", "<<planePoints[1]<<", "<<planePoints[2] <<std::endl;
+        std::cout<<"1: " <<planePoints[3] <<", "<<planePoints[4]<<", "<<planePoints[5] <<std::endl;
+        std::cout<<"2: " <<planePoints[6] <<", "<<planePoints[7]<<", "<<planePoints[8] <<std::endl<<std::endl;
 
     GLuint planePointsVbo = 0;
     glGenBuffers(1, &planePointsVbo);
@@ -192,7 +202,7 @@ void initPlane(){
 
             PlaneIndexList[count] = j + (i*(division+1));
             PlaneIndexList[count+1] = PlaneIndexList[count] + 1;
-            PlaneIndexList[count+2] = PlaneIndexList[count] + 9;
+            PlaneIndexList[count+2] = PlaneIndexList[count] + (division+2);
             PlaneIndexList[count+3] = PlaneIndexList[count];
             PlaneIndexList[count+4] = PlaneIndexList[count+2];
             PlaneIndexList[count+5] = PlaneIndexList[count] + (division+1);
@@ -201,12 +211,6 @@ void initPlane(){
 
         }
     }
-    
-    std::cout<<"triangle 1: " <<PlaneIndexList[0] <<", "<<PlaneIndexList[1]<<", "<<PlaneIndexList[2] <<std::endl;
-    std::cout<<"triangle 2: " <<PlaneIndexList[3] <<", "<<PlaneIndexList[4]<<", "<<PlaneIndexList[5] <<std::endl;
-    std::cout<<"triangle 3: " <<PlaneIndexList[6] <<", "<<PlaneIndexList[7]<<", "<<PlaneIndexList[8] <<std::endl;
-    std::cout<<"triangle 4: " <<PlaneIndexList[9] <<", "<<PlaneIndexList[10]<<", "<<PlaneIndexList[11] <<std::endl;
-    std::cout<<"triangle 5: " <<PlaneIndexList[12] <<", "<<PlaneIndexList[13]<<", "<<PlaneIndexList[14] <<std::endl;
     
     GLuint planeIBO;
     glGenBuffers(1, &planeIBO);
@@ -233,7 +237,7 @@ void drawPlane(){
     glBindVertexArray(planeVao);
     glBindTexture(GL_TEXTURE_2D, plane_tex);
     
-    glDrawElements(GL_TRIANGLES, 6*49, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, row*col*6, GL_UNSIGNED_SHORT, 0);
     
 }
 
@@ -326,6 +330,13 @@ void Timer(int id){
 // main
 //
 int main(int argc, char** argv){
+    std::cout<< "Enter the divisions of plane you like: ";
+    
+    std::cin>> division;
+    dividedUnit = planeUnit/division;
+    row = division;
+    col = division;
+    NumVertices = row * col * 6;
     
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_3_2_CORE_PROFILE | GLUT_DOUBLE | GLUT_DEPTH);
